@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>VLA Playground — SmolVLA vs OpenVLA</title>
+  <title>OpenVLA Playground</title>
   <style>
     :root {
       --bg: #0f1115;
@@ -16,12 +16,11 @@
       --accent-2: #b07cff;
       --green: #56d364;
       --red: #f97583;
-      --yellow: #e3b341;
       --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
     header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
     h1 { font-size: 20px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
     .subtle { color: var(--muted); font-size: 12px; }
@@ -29,11 +28,11 @@
 
     .grid {
       display: grid;
-      grid-template-columns: 380px 1fr 1fr;
+      grid-template-columns: 400px 1fr;
       gap: 16px;
       align-items: start;
     }
-    @media (max-width: 1000px) {
+    @media (max-width: 900px) {
       .grid { grid-template-columns: 1fr; }
     }
 
@@ -92,10 +91,6 @@
     }
     .examples button:hover { border-color: var(--accent); color: var(--accent); }
 
-    fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px 10px; margin: 14px 0 4px; }
-    legend { color: var(--muted); font-size: 12px; padding: 0 6px; }
-    fieldset label { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; color: var(--text); }
-
     button.primary {
       margin-top: 16px;
       width: 100%;
@@ -118,7 +113,6 @@
     .status.err { color: var(--red); }
     .status.ok { color: var(--green); }
 
-    /* Result panels */
     .result-empty { color: var(--muted); font-size: 12px; }
     .result-meta { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
     .result-meta b { color: var(--text); font-weight: 500; font-family: var(--mono); }
@@ -144,7 +138,7 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>VLA Playground</h1>
+      <h1>OpenVLA Playground</h1>
       <span class="subtle">Modal app: <code id="appName">vla-inference</code></span>
     </header>
 
@@ -170,12 +164,6 @@
           <button data-task="wipe the table with the cloth">wipe the table</button>
         </div>
 
-        <fieldset>
-          <legend>Models</legend>
-          <label><input type="checkbox" id="useSmolvla" checked /> SmolVLA</label>
-          <label><input type="checkbox" id="useOpenvla" checked /> OpenVLA</label>
-        </fieldset>
-
         <label for="unnormKey">OpenVLA <code>unnorm_key</code></label>
         <select id="unnormKey">
           <option value="bridge_orig" selected>bridge_orig (BridgeV2 / WidowX)</option>
@@ -191,15 +179,6 @@
         <div class="status" id="status">Ready. First call may take 30–60 s while the container warms up.</div>
       </section>
 
-      <!-- SmolVLA result -->
-      <section class="card" id="smolvlaCard">
-        <h2>SmolVLA <span class="badge">T4 · ~500M</span></h2>
-        <p class="desc">6-dim joint-space action (SO-100/101 convention).</p>
-        <div id="smolvlaBody">
-          <div class="result-empty">No result yet.</div>
-        </div>
-      </section>
-
       <!-- OpenVLA result -->
       <section class="card" id="openvlaCard">
         <h2>OpenVLA <span class="badge">L4 · 7B · bf16</span></h2>
@@ -211,14 +190,13 @@
     </div>
 
     <footer>
-      Local playground for <code>SmolVLAWorker</code> / <code>OpenVLAWorker</code> on Modal. See <a href="/docs">/docs</a>.
+      Local playground for <code>OpenVLAWorker</code> on Modal. See <a href="/docs">/docs</a>.
     </footer>
   </div>
 
   <script>
     const $ = (sel) => document.querySelector(sel);
 
-    const SMOLVLA_LABELS = ["joint_0", "joint_1", "joint_2", "joint_3", "joint_4", "joint_5 / gripper"];
     const OPENVLA_LABELS = ["Δx", "Δy", "Δz", "Δroll", "Δpitch", "Δyaw", "gripper"];
 
     // --- image handling ---------------------------------------------------
@@ -262,13 +240,8 @@
     }
 
     function renderActionTable(action, labels) {
-      // action might be a flat list (one step) or a list-of-lists (chunk).
-      // For visual simplicity we collapse to the *first* step here, but we
-      // also show the full chunk in the raw JSON below.
       let row = action;
-      if (Array.isArray(action) && Array.isArray(action[0])) {
-        row = action[0];
-      }
+      if (Array.isArray(action) && Array.isArray(action[0])) row = action[0];
       if (!Array.isArray(row)) return "<div class='result-empty'>Action is not an array.</div>";
 
       const maxAbs = Math.max(...row.map((v) => Math.abs(v || 0)), 1e-6);
@@ -292,10 +265,10 @@
       `;
     }
 
-    function renderResult(containerId, key, result, labels) {
-      const el = $(containerId);
+    function renderResult(result) {
+      const el = $("#openvlaBody");
       if (!result) {
-        el.innerHTML = `<div class="result-empty">Skipped.</div>`;
+        el.innerHTML = `<div class="result-empty">No result.</div>`;
         return;
       }
       if (result.ok === false) {
@@ -310,13 +283,11 @@
         `task <b>${result.task ?? ""}</b>`,
         `latency <b>${fmt(result.elapsed_ms)} ms</b>`,
         `shape <b>${JSON.stringify(result.shape ?? [])}</b>`,
+        `unnorm <b>${result.unnorm_key_used ?? "?"}</b>`,
       ];
-      if (result.unnorm_key_used) {
-        meta.push(`unnorm <b>${result.unnorm_key_used}</b>`);
-      }
       el.innerHTML = `
         <div class="result-meta">${meta.map((s) => `<span>${s}</span>`).join("")}</div>
-        ${renderActionTable(result.action, labels)}
+        ${renderActionTable(result.action, OPENVLA_LABELS)}
         <details class="raw">
           <summary>Raw JSON</summary>
           <pre>${JSON.stringify(result, null, 2)}</pre>
@@ -340,22 +311,11 @@
         status.textContent = "Please enter a task instruction.";
         return;
       }
-      const models = [];
-      if ($("#useSmolvla").checked) models.push("smolvla");
-      if ($("#useOpenvla").checked) models.push("openvla");
-      if (models.length === 0) {
-        status.className = "status err";
-        status.textContent = "Pick at least one model.";
-        return;
-      }
 
       btn.disabled = true;
       status.className = "status";
-      status.textContent = `Calling ${models.join(" + ")}…  (cold-start may take 30–60 s)`;
-      for (const m of models) {
-        const id = m === "smolvla" ? "#smolvlaBody" : "#openvlaBody";
-        $(id).innerHTML = `<div class="result-empty">Running…</div>`;
-      }
+      status.textContent = `Calling OpenVLA…  (cold-start may take 30–60 s)`;
+      $("#openvlaBody").innerHTML = `<div class="result-empty">Running…</div>`;
 
       const t0 = performance.now();
       try {
@@ -365,7 +325,6 @@
           body: JSON.stringify({
             image_b64: imageB64,
             task,
-            models,
             unnorm_key: $("#unnormKey").value,
           }),
         });
@@ -375,15 +334,10 @@
           throw new Error(`HTTP ${resp.status}: ${txt}`);
         }
         const data = await resp.json();
+        renderResult(data);
 
-        renderResult("#smolvlaBody", "smolvla", data.smolvla, SMOLVLA_LABELS);
-        renderResult("#openvlaBody", "openvla", data.openvla, OPENVLA_LABELS);
-
-        const okMsg = Object.entries(data)
-          .map(([k, v]) => `${k}: ${v.ok ? "ok" : "error"} (${fmt(v.elapsed_ms)} ms)`)
-          .join(" · ");
-        status.className = "status ok";
-        status.textContent = `Done in ${fmt(totalMs)} ms — ${okMsg}`;
+        status.className = data.ok === false ? "status err" : "status ok";
+        status.textContent = `Done in ${fmt(totalMs)} ms — ${data.ok === false ? "error" : "ok"} (${fmt(data.elapsed_ms)} ms server-side)`;
       } catch (e) {
         status.className = "status err";
         status.textContent = `Error: ${e.message ?? e}`;
@@ -394,7 +348,6 @@
 
     $("#predictBtn").addEventListener("click", predict);
 
-    // --- show which Modal app we're talking to ---------------------------
     fetch("/api/info").then((r) => r.json()).then((info) => {
       $("#appName").textContent = info.app_name;
     }).catch(() => {});
