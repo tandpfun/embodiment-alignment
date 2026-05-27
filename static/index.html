@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VLA Playground — SmolVLA vs OpenVLA</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #181b22;
+      --panel-2: #20242d;
+      --border: #2a2f3a;
+      --muted: #8a93a4;
+      --text: #e6e8ee;
+      --accent: #6ea8ff;
+      --accent-2: #b07cff;
+      --green: #56d364;
+      --red: #f97583;
+      --yellow: #e3b341;
+      --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+    h1 { font-size: 20px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+    .subtle { color: var(--muted); font-size: 12px; }
+    .subtle code { font-family: var(--mono); background: var(--panel-2); padding: 1px 6px; border-radius: 4px; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 1000px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .card h2 {
+      font-size: 14px;
+      margin: 0 0 12px 0;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .card h2 .badge {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .card .desc { color: var(--muted); margin: -6px 0 12px 0; font-size: 12px; }
+
+    label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 4px; }
+    input[type=text], select {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font: inherit;
+      font-family: inherit;
+    }
+    input[type=text]:focus, select:focus { outline: 1px solid var(--accent); }
+    input[type=file] { font-size: 12px; }
+
+    .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .examples button {
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 11px;
+      padding: 4px 10px;
+      cursor: pointer;
+    }
+    .examples button:hover { border-color: var(--accent); color: var(--accent); }
+
+    fieldset { border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px 10px; margin: 14px 0 4px; }
+    legend { color: var(--muted); font-size: 12px; padding: 0 6px; }
+    fieldset label { display: inline-flex; align-items: center; gap: 6px; margin-right: 14px; color: var(--text); }
+
+    button.primary {
+      margin-top: 16px;
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 0;
+      font: inherit;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b0d12;
+      cursor: pointer;
+    }
+    button.primary:disabled { opacity: 0.5; cursor: progress; }
+
+    .preview { margin-top: 10px; padding: 8px; background: var(--panel-2); border-radius: 6px; min-height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border); }
+    .preview img { max-width: 100%; max-height: 240px; border-radius: 4px; display: block; }
+    .preview .empty { color: var(--muted); font-size: 12px; }
+
+    .status { margin-top: 10px; font-size: 12px; color: var(--muted); min-height: 18px; }
+    .status.err { color: var(--red); }
+    .status.ok { color: var(--green); }
+
+    /* Result panels */
+    .result-empty { color: var(--muted); font-size: 12px; }
+    .result-meta { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; flex-wrap: wrap; }
+    .result-meta b { color: var(--text); font-weight: 500; font-family: var(--mono); }
+    .err-box { background: rgba(249, 117, 131, 0.08); border: 1px solid rgba(249, 117, 131, 0.25); color: var(--red); padding: 10px; border-radius: 6px; font-family: var(--mono); font-size: 12px; white-space: pre-wrap; overflow-wrap: break-word; }
+
+    .action-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+    .action-table th, .action-table td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); }
+    .action-table th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .action-table td .bar { display: inline-block; height: 6px; vertical-align: middle; border-radius: 2px; }
+    .action-table td .bar.pos { background: var(--green); }
+    .action-table td .bar.neg { background: var(--red); }
+    .action-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    details.raw { margin-top: 12px; }
+    details.raw summary { cursor: pointer; font-size: 12px; color: var(--muted); }
+    details.raw pre { font-family: var(--mono); font-size: 11px; background: var(--panel-2); border: 1px solid var(--border); padding: 10px; border-radius: 6px; overflow-x: auto; }
+
+    footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>VLA Playground</h1>
+      <span class="subtle">Modal app: <code id="appName">vla-inference</code></span>
+    </header>
+
+    <div class="grid">
+      <!-- INPUT -->
+      <section class="card">
+        <h2>Input</h2>
+
+        <label for="imageFile">Image</label>
+        <input type="file" id="imageFile" accept="image/*" />
+        <div class="preview" id="preview">
+          <span class="empty">No image loaded. Drop or choose any photo.</span>
+        </div>
+
+        <label for="taskInput">Task instruction</label>
+        <input type="text" id="taskInput" value="pick up the cup on the table" />
+        <div class="examples" id="examples">
+          <button data-task="pick up the cup on the table">pick up the cup</button>
+          <button data-task="put the red block in the bowl">red block → bowl</button>
+          <button data-task="open the drawer">open the drawer</button>
+          <button data-task="fold the towel">fold the towel</button>
+          <button data-task="remove the lid from the cup">remove cup lid</button>
+          <button data-task="wipe the table with the cloth">wipe the table</button>
+        </div>
+
+        <fieldset>
+          <legend>Models</legend>
+          <label><input type="checkbox" id="useSmolvla" checked /> SmolVLA</label>
+          <label><input type="checkbox" id="useOpenvla" checked /> OpenVLA</label>
+        </fieldset>
+
+        <label for="unnormKey">OpenVLA <code>unnorm_key</code></label>
+        <select id="unnormKey">
+          <option value="bridge_orig" selected>bridge_orig (BridgeV2 / WidowX)</option>
+          <option value="fractal20220817_data">fractal20220817_data (RT-1)</option>
+          <option value="jaco_play">jaco_play (Kinova)</option>
+          <option value="berkeley_autolab_ur5">berkeley_autolab_ur5</option>
+          <option value="taco_play">taco_play (Franka)</option>
+          <option value="kuka">kuka (KUKA IIWA)</option>
+          <option value="austin_buds_dataset_converted_externally_to_rlds">austin_buds</option>
+        </select>
+
+        <button class="primary" id="predictBtn">Predict</button>
+        <div class="status" id="status">Ready. First call may take 30–60 s while the container warms up.</div>
+      </section>
+
+      <!-- SmolVLA result -->
+      <section class="card" id="smolvlaCard">
+        <h2>SmolVLA <span class="badge">T4 · ~500M</span></h2>
+        <p class="desc">6-dim joint-space action (SO-100/101 convention).</p>
+        <div id="smolvlaBody">
+          <div class="result-empty">No result yet.</div>
+        </div>
+      </section>
+
+      <!-- OpenVLA result -->
+      <section class="card" id="openvlaCard">
+        <h2>OpenVLA <span class="badge">L4 · 7B · bf16</span></h2>
+        <p class="desc">7-DoF end-effector delta: <code>(Δx, Δy, Δz, Δroll, Δpitch, Δyaw, gripper)</code>.</p>
+        <div id="openvlaBody">
+          <div class="result-empty">No result yet.</div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Local playground for <code>SmolVLAWorker</code> / <code>OpenVLAWorker</code> on Modal. See <a href="/docs">/docs</a>.
+    </footer>
+  </div>
+
+  <script>
+    const $ = (sel) => document.querySelector(sel);
+
+    const SMOLVLA_LABELS = ["joint_0", "joint_1", "joint_2", "joint_3", "joint_4", "joint_5 / gripper"];
+    const OPENVLA_LABELS = ["Δx", "Δy", "Δz", "Δroll", "Δpitch", "Δyaw", "gripper"];
+
+    // --- image handling ---------------------------------------------------
+    let imageB64 = null;
+
+    function fileToB64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const comma = dataUrl.indexOf(",");
+          resolve({ b64: dataUrl.slice(comma + 1), dataUrl });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    $("#imageFile").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const { b64, dataUrl } = await fileToB64(file);
+      imageB64 = b64;
+      $("#preview").innerHTML = `<img src="${dataUrl}" alt="preview" />`;
+    });
+
+    // --- example chips ----------------------------------------------------
+    document.querySelectorAll("#examples button").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        $("#taskInput").value = btn.dataset.task;
+      });
+    });
+
+    // --- rendering --------------------------------------------------------
+    function fmt(n) {
+      if (n === null || n === undefined || Number.isNaN(n)) return "—";
+      const abs = Math.abs(n);
+      if (abs >= 100) return n.toFixed(2);
+      if (abs >= 1) return n.toFixed(3);
+      return n.toFixed(4);
+    }
+
+    function renderActionTable(action, labels) {
+      // action might be a flat list (one step) or a list-of-lists (chunk).
+      // For visual simplicity we collapse to the *first* step here, but we
+      // also show the full chunk in the raw JSON below.
+      let row = action;
+      if (Array.isArray(action) && Array.isArray(action[0])) {
+        row = action[0];
+      }
+      if (!Array.isArray(row)) return "<div class='result-empty'>Action is not an array.</div>";
+
+      const maxAbs = Math.max(...row.map((v) => Math.abs(v || 0)), 1e-6);
+      const trs = row.map((v, i) => {
+        const label = labels[i] ?? `dim_${i}`;
+        const pct = Math.min(100, (Math.abs(v) / maxAbs) * 100);
+        const sign = v >= 0 ? "pos" : "neg";
+        return `
+          <tr>
+            <td>${label}</td>
+            <td class="num">${fmt(v)}</td>
+            <td><span class="bar ${sign}" style="width:${pct}%"></span></td>
+          </tr>
+        `;
+      }).join("");
+      return `
+        <table class="action-table">
+          <thead><tr><th>dim</th><th class="num">value</th><th style="width:55%"></th></tr></thead>
+          <tbody>${trs}</tbody>
+        </table>
+      `;
+    }
+
+    function renderResult(containerId, key, result, labels) {
+      const el = $(containerId);
+      if (!result) {
+        el.innerHTML = `<div class="result-empty">Skipped.</div>`;
+        return;
+      }
+      if (result.ok === false) {
+        el.innerHTML = `
+          <div class="result-meta"><span>latency <b>${fmt(result.elapsed_ms)} ms</b></span></div>
+          <div class="err-box">${result.error}</div>
+        `;
+        return;
+      }
+      const meta = [
+        `model_id <b>${result.model_id ?? "?"}</b>`,
+        `task <b>${result.task ?? ""}</b>`,
+        `latency <b>${fmt(result.elapsed_ms)} ms</b>`,
+        `shape <b>${JSON.stringify(result.shape ?? [])}</b>`,
+      ];
+      if (result.unnorm_key_used) {
+        meta.push(`unnorm <b>${result.unnorm_key_used}</b>`);
+      }
+      el.innerHTML = `
+        <div class="result-meta">${meta.map((s) => `<span>${s}</span>`).join("")}</div>
+        ${renderActionTable(result.action, labels)}
+        <details class="raw">
+          <summary>Raw JSON</summary>
+          <pre>${JSON.stringify(result, null, 2)}</pre>
+        </details>
+      `;
+    }
+
+    // --- main submit ------------------------------------------------------
+    async function predict() {
+      const btn = $("#predictBtn");
+      const status = $("#status");
+
+      if (!imageB64) {
+        status.className = "status err";
+        status.textContent = "Please choose an image first.";
+        return;
+      }
+      const task = $("#taskInput").value.trim();
+      if (!task) {
+        status.className = "status err";
+        status.textContent = "Please enter a task instruction.";
+        return;
+      }
+      const models = [];
+      if ($("#useSmolvla").checked) models.push("smolvla");
+      if ($("#useOpenvla").checked) models.push("openvla");
+      if (models.length === 0) {
+        status.className = "status err";
+        status.textContent = "Pick at least one model.";
+        return;
+      }
+
+      btn.disabled = true;
+      status.className = "status";
+      status.textContent = `Calling ${models.join(" + ")}…  (cold-start may take 30–60 s)`;
+      for (const m of models) {
+        const id = m === "smolvla" ? "#smolvlaBody" : "#openvlaBody";
+        $(id).innerHTML = `<div class="result-empty">Running…</div>`;
+      }
+
+      const t0 = performance.now();
+      try {
+        const resp = await fetch("/api/predict", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            image_b64: imageB64,
+            task,
+            models,
+            unnorm_key: $("#unnormKey").value,
+          }),
+        });
+        const totalMs = performance.now() - t0;
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${txt}`);
+        }
+        const data = await resp.json();
+
+        renderResult("#smolvlaBody", "smolvla", data.smolvla, SMOLVLA_LABELS);
+        renderResult("#openvlaBody", "openvla", data.openvla, OPENVLA_LABELS);
+
+        const okMsg = Object.entries(data)
+          .map(([k, v]) => `${k}: ${v.ok ? "ok" : "error"} (${fmt(v.elapsed_ms)} ms)`)
+          .join(" · ");
+        status.className = "status ok";
+        status.textContent = `Done in ${fmt(totalMs)} ms — ${okMsg}`;
+      } catch (e) {
+        status.className = "status err";
+        status.textContent = `Error: ${e.message ?? e}`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $("#predictBtn").addEventListener("click", predict);
+
+    // --- show which Modal app we're talking to ---------------------------
+    fetch("/api/info").then((r) => r.json()).then((info) => {
+      $("#appName").textContent = info.app_name;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

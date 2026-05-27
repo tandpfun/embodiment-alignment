@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# HF cache (when we let it default to project-local)
+.cache/
+
+# Modal local config / build cache
+.modal_token
+.modal/
+
+# Local outputs from comparison runs
+outputs/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store

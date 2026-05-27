@@ -1,0 +1,22 @@
+[project]
+name = "vla-egodex-oxe"
+version = "0.1.0"
+description = "Compare SmolVLA and OpenVLA on EgoDex (human) vs Open X-Embodiment (robot) frames, served on Modal."
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+
+# Local dependencies: enough to deploy the Modal app, run the smoke test, and
+# serve the local web UI. The heavy ML packages (torch, transformers,
+# lerobot[smolvla]) live inside the Modal images, not locally. We'll add
+# lerobot + huggingface_hub back here when we wire up the dataset-side
+# comparison script.
+dependencies = [
+    "modal>=1.0",
+    "pillow>=10",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+]
+
+[tool.uv]
+# We don't want uv to try to build a package from this directory; this is just a script project.
+package = false
