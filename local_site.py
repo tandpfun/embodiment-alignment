@@ -65,11 +65,13 @@ class PredictRequest(BaseModel):
         ...,
         description="Base64-encoded image bytes (any common format: JPEG, PNG, ...).",
     )
+    comparison_image_b64: str | None = Field(default=None)
     task: str = Field(..., description="Natural-language instruction.")
     unnorm_key: str = Field(
         default="bridge_orig",
         description="OpenVLA un-normalisation key (per-OXE-subset stats).",
     )
+    return_activations: bool = Field(default=False)
 
 
 # -----------------------------------------------------------------------------
@@ -101,6 +103,12 @@ async def predict(req: PredictRequest) -> dict[str, Any]:
         image_bytes = base64.b64decode(req.image_b64)
     except Exception as e:
         raise HTTPException(400, f"Bad image_b64: {e}") from e
+    comparison_image_bytes = None
+    if req.comparison_image_b64:
+        try:
+            comparison_image_bytes = base64.b64decode(req.comparison_image_b64)
+        except Exception as e:
+            raise HTTPException(400, f"Bad comparison_image_b64: {e}") from e
 
     worker = get_worker()
     t0 = time.perf_counter()
@@ -109,6 +117,8 @@ async def predict(req: PredictRequest) -> dict[str, Any]:
             image_bytes=image_bytes,
             task=req.task,
             unnorm_key=req.unnorm_key,
+            return_activations=req.return_activations,
+            comparison_image_bytes=comparison_image_bytes,
         )
         elapsed_ms = (time.perf_counter() - t0) * 1000
         return {"ok": True, "elapsed_ms": elapsed_ms, **out}

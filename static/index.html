@@ -16,11 +16,12 @@
       --accent-2: #b07cff;
       --green: #56d364;
       --red: #f97583;
+      --orange: #f0a04b;
       --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
     header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
     h1 { font-size: 20px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
     .subtle { color: var(--muted); font-size: 12px; }
@@ -32,9 +33,7 @@
       gap: 16px;
       align-items: start;
     }
-    @media (max-width: 900px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
     .card {
       background: var(--panel);
@@ -42,66 +41,39 @@
       border-radius: 10px;
       padding: 16px;
     }
+    .card + .card { margin-top: 16px; }
     .card h2 {
-      font-size: 14px;
-      margin: 0 0 12px 0;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: var(--muted);
+      font-size: 14px; margin: 0 0 12px 0; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
     }
     .card h2 .badge {
-      display: inline-block;
-      margin-left: 8px;
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 10px;
-      font-family: var(--mono);
-      color: var(--text);
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      text-transform: none;
-      letter-spacing: 0;
+      display: inline-block; margin-left: 8px; padding: 1px 6px; border-radius: 4px;
+      font-size: 10px; font-family: var(--mono); color: var(--text);
+      background: var(--panel-2); border: 1px solid var(--border);
+      text-transform: none; letter-spacing: 0;
     }
     .card .desc { color: var(--muted); margin: -6px 0 12px 0; font-size: 12px; }
 
     label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 4px; }
     input[type=text], select {
-      width: 100%;
-      padding: 8px 10px;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font: inherit;
-      font-family: inherit;
+      width: 100%; padding: 8px 10px; background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: 6px; color: var(--text); font: inherit;
     }
     input[type=text]:focus, select:focus { outline: 1px solid var(--accent); }
     input[type=file] { font-size: 12px; }
 
     .examples { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
     .examples button {
-      background: var(--panel-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      font-size: 11px;
-      padding: 4px 10px;
-      cursor: pointer;
+      background: var(--panel-2); color: var(--text); border: 1px solid var(--border);
+      border-radius: 999px; font-size: 11px; padding: 4px 10px; cursor: pointer;
     }
     .examples button:hover { border-color: var(--accent); color: var(--accent); }
 
     button.primary {
-      margin-top: 16px;
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 0;
-      font: inherit;
-      font-weight: 600;
+      margin-top: 16px; width: 100%; padding: 10px; border-radius: 8px; border: 0;
+      font: inherit; font-weight: 600;
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #0b0d12;
-      cursor: pointer;
+      color: #0b0d12; cursor: pointer;
     }
     button.primary:disabled { opacity: 0.5; cursor: progress; }
 
@@ -128,11 +100,68 @@
 
     details.raw { margin-top: 12px; }
     details.raw summary { cursor: pointer; font-size: 12px; color: var(--muted); }
-    details.raw pre { font-family: var(--mono); font-size: 11px; background: var(--panel-2); border: 1px solid var(--border); padding: 10px; border-radius: 6px; overflow-x: auto; }
+    details.raw pre { font-family: var(--mono); font-size: 11px; background: var(--panel-2); border: 1px solid var(--border); padding: 10px; border-radius: 6px; overflow-x: auto; max-height: 300px; }
 
     footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
+
+    /* Dataset sample picker */
+    .sample-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+    .sample-card {
+      background: var(--panel-2); border: 2px solid var(--border); border-radius: 8px;
+      padding: 6px; cursor: pointer; transition: border-color 0.15s;
+    }
+    .sample-card:hover { border-color: var(--accent); }
+    .sample-card.selected { border-color: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2); }
+    .sample-card img { width: 100%; border-radius: 4px; display: block; aspect-ratio: 426/240; object-fit: cover; }
+    .sample-card .sample-label { font-size: 10px; color: var(--muted); margin-top: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sample-card .sample-type { font-size: 9px; color: var(--accent); text-align: center; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .img-pair { display: flex; gap: 8px; margin-top: 8px; }
+    .img-pair > div { flex: 1; }
+    .img-pair img { width: 100%; border-radius: 4px; }
+    .img-pair .img-label { font-size: 10px; color: var(--muted); text-align: center; margin-top: 2px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .tab {
+      padding: 6px 14px; font-size: 12px; font-weight: 500; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Activation viz */
+    .act-section { margin-top: 12px; }
+    .act-section h3 { font-size: 12px; color: var(--muted); margin: 0 0 8px 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+    .norms-chart { display: flex; gap: 12px; flex-wrap: wrap; }
+    .norm-strip { flex: 1; min-width: 120px; }
+    .norm-strip .strip-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-family: var(--mono); }
+    .norm-strip canvas { width: 100%; height: 40px; border-radius: 4px; border: 1px solid var(--border); }
+    .attn-heatmap { margin-top: 8px; }
+    .attn-heatmap canvas { border-radius: 4px; border: 1px solid var(--border); image-rendering: pixelated; }
+    .attn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+    .attn-item { text-align: center; }
+    .attn-item .strip-label { font-size: 10px; color: var(--muted); margin-bottom: 4px; font-family: var(--mono); }
+    .cka-wrap { display: grid; grid-template-columns: minmax(220px, 320px) 1fr; gap: 14px; align-items: start; }
+    .cka-wrap canvas { width: 100%; max-width: 320px; border-radius: 4px; border: 1px solid var(--border); image-rendering: pixelated; }
+    .cka-bars { display: grid; gap: 4px; font-family: var(--mono); font-size: 10px; }
+    .cka-bar { display: grid; grid-template-columns: 58px 1fr 42px; gap: 8px; align-items: center; }
+    .cka-bar-track { height: 7px; background: var(--panel-2); border-radius: 999px; overflow: hidden; }
+    .cka-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); border-radius: 999px; }
+    @media (max-width: 900px) { .cka-wrap { grid-template-columns: 1fr; } }
+
+    /* Checkbox */
+    .check-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .check-row input[type=checkbox] { accent-color: var(--accent); }
+    .check-row label { margin: 0; font-size: 12px; color: var(--text); }
+
+    /* Ground truth comparison */
+    .gt-compare { margin-top: 12px; padding: 10px; background: var(--panel-2); border-radius: 6px; border: 1px solid var(--border); }
+    .gt-compare h3 { font-size: 11px; color: var(--orange); margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -143,72 +172,124 @@
     </header>
 
     <div class="grid">
-      <!-- INPUT -->
-      <section class="card">
-        <h2>Input</h2>
+      <!-- LEFT COLUMN: INPUT -->
+      <div>
+        <section class="card">
+          <h2>Input</h2>
 
-        <label for="imageFile">Image</label>
-        <input type="file" id="imageFile" accept="image/*" />
-        <div class="preview" id="preview">
-          <span class="empty">No image loaded. Drop or choose any photo.</span>
-        </div>
+          <div class="tabs" id="inputTabs">
+            <div class="tab active" data-tab="upload">Upload</div>
+            <div class="tab" data-tab="dataset">H&amp;R Dataset</div>
+          </div>
 
-        <label for="taskInput">Task instruction</label>
-        <input type="text" id="taskInput" value="pick up the cup on the table" />
-        <div class="examples" id="examples">
-          <button data-task="pick up the cup on the table">pick up the cup</button>
-          <button data-task="put the red block in the bowl">red block → bowl</button>
-          <button data-task="open the drawer">open the drawer</button>
-          <button data-task="fold the towel">fold the towel</button>
-          <button data-task="remove the lid from the cup">remove cup lid</button>
-          <button data-task="wipe the table with the cloth">wipe the table</button>
-        </div>
+          <!-- Upload tab -->
+          <div class="tab-content active" id="tab-upload">
+            <label for="imageFile">Image</label>
+            <input type="file" id="imageFile" accept="image/*" />
+            <div class="preview" id="preview">
+              <span class="empty">No image loaded. Drop or choose any photo.</span>
+            </div>
+          </div>
 
-        <label for="unnormKey">OpenVLA <code>unnorm_key</code></label>
-        <select id="unnormKey">
-          <option value="bridge_orig" selected>bridge_orig (BridgeV2 / WidowX)</option>
-          <option value="fractal20220817_data">fractal20220817_data (RT-1)</option>
-          <option value="jaco_play">jaco_play (Kinova)</option>
-          <option value="berkeley_autolab_ur5">berkeley_autolab_ur5</option>
-          <option value="taco_play">taco_play (Franka)</option>
-          <option value="kuka">kuka (KUKA IIWA)</option>
-          <option value="austin_buds_dataset_converted_externally_to_rlds">austin_buds</option>
-        </select>
+          <!-- Dataset tab -->
+          <div class="tab-content" id="tab-dataset">
+            <div id="sampleGrid" class="sample-grid">
+              <div class="result-empty">Loading samples…</div>
+            </div>
+            <div id="samplePreview" style="display:none;">
+              <div class="img-pair">
+                <div>
+                  <img id="sampleRobot" alt="robot view" />
+                  <div class="img-label">Robot camera</div>
+                </div>
+                <div>
+                  <img id="sampleHuman" alt="human view" />
+                  <div class="img-label">Human camera</div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <button class="primary" id="predictBtn">Predict</button>
-        <div class="status" id="status">Ready. First call may take 30–60 s while the container warms up.</div>
-      </section>
+          <label for="taskInput">Task instruction</label>
+          <input type="text" id="taskInput" value="pick up the cup on the table" />
+          <div class="examples" id="examples">
+            <button data-task="pick up the cup on the table">pick up the cup</button>
+            <button data-task="put the red block in the bowl">red block &rarr; bowl</button>
+            <button data-task="open the drawer">open the drawer</button>
+            <button data-task="pick up the pencil">pick up the pencil</button>
+            <button data-task="push the box">push the box</button>
+          </div>
 
-      <!-- OpenVLA result -->
-      <section class="card" id="openvlaCard">
-        <h2>OpenVLA <span class="badge">L4 · 7B · bf16</span></h2>
-        <p class="desc">7-DoF end-effector delta: <code>(Δx, Δy, Δz, Δroll, Δpitch, Δyaw, gripper)</code>.</p>
-        <div id="openvlaBody">
-          <div class="result-empty">No result yet.</div>
-        </div>
-      </section>
+          <label for="unnormKey">OpenVLA <code>unnorm_key</code></label>
+          <select id="unnormKey">
+            <option value="bridge_orig" selected>bridge_orig (BridgeV2 / WidowX)</option>
+            <option value="fractal20220817_data">fractal20220817_data (RT-1)</option>
+            <option value="jaco_play">jaco_play (Kinova)</option>
+            <option value="berkeley_autolab_ur5">berkeley_autolab_ur5</option>
+            <option value="taco_play">taco_play (Franka)</option>
+            <option value="kuka">kuka (KUKA IIWA)</option>
+          </select>
+
+          <div class="check-row">
+            <input type="checkbox" id="activationsCheck" checked />
+            <label for="activationsCheck">Return activations (hidden states + attention)</label>
+          </div>
+
+          <button class="primary" id="predictBtn">Predict</button>
+          <div class="status" id="status">Ready. First call may take 30–60 s while the container warms up.</div>
+        </section>
+      </div>
+
+      <!-- RIGHT COLUMN: RESULTS -->
+      <div>
+        <section class="card" id="openvlaCard">
+          <h2>OpenVLA <span class="badge">L4 &middot; 7B &middot; bf16</span></h2>
+          <p class="desc">7-DoF end-effector delta: <code>(&Delta;x, &Delta;y, &Delta;z, &Delta;roll, &Delta;pitch, &Delta;yaw, gripper)</code>.</p>
+          <div id="openvlaBody">
+            <div class="result-empty">No result yet.</div>
+          </div>
+        </section>
+
+        <section class="card" id="activationsCard" style="display:none;">
+          <h2>Activations</h2>
+          <div id="activationsBody">
+            <div class="result-empty">No activations yet.</div>
+          </div>
+        </section>
+      </div>
     </div>
 
     <footer>
-      Local playground for <code>OpenVLAWorker</code> on Modal. See <a href="/docs">/docs</a>.
+      Playground for <code>OpenVLAWorker</code> on Modal &middot; Dataset: <a href="https://huggingface.co/datasets/dannyXSC/HumanAndRobot" target="_blank">dannyXSC/HumanAndRobot</a>
     </footer>
   </div>
 
   <script>
     const $ = (sel) => document.querySelector(sel);
+    const $$ = (sel) => document.querySelectorAll(sel);
+    const OPENVLA_LABELS = ["\u0394x", "\u0394y", "\u0394z", "\u0394roll", "\u0394pitch", "\u0394yaw", "gripper"];
 
-    const OPENVLA_LABELS = ["Δx", "Δy", "Δz", "Δroll", "Δpitch", "Δyaw", "gripper"];
+    // ---- Tabs ----
+    $$('#inputTabs .tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        $$('#inputTabs .tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        $$('.tab-content').forEach(c => c.classList.remove('active'));
+        $(`#tab-${tab.dataset.tab}`).classList.add('active');
+      });
+    });
 
-    // --- image handling ---------------------------------------------------
+    // ---- Image handling ----
     let imageB64 = null;
+    let comparisonImageB64 = null;
+    let selectedSample = null;
 
     function fileToB64(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
           const dataUrl = reader.result;
-          const comma = dataUrl.indexOf(",");
-          resolve({ b64: dataUrl.slice(comma + 1), dataUrl });
+          resolve({ b64: dataUrl.slice(dataUrl.indexOf(",") + 1), dataUrl });
         };
         reader.onerror = reject;
         reader.readAsDataURL(file);
@@ -220,62 +301,113 @@
       if (!file) return;
       const { b64, dataUrl } = await fileToB64(file);
       imageB64 = b64;
+      comparisonImageB64 = null;
+      selectedSample = null;
       $("#preview").innerHTML = `<img src="${dataUrl}" alt="preview" />`;
     });
 
-    // --- example chips ----------------------------------------------------
-    document.querySelectorAll("#examples button").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        $("#taskInput").value = btn.dataset.task;
+    // ---- Dataset samples ----
+    let manifest = [];
+
+    async function loadManifest() {
+      try {
+        const resp = await fetch("/static/samples/manifest.json");
+        manifest = await resp.json();
+        renderSampleGrid();
+      } catch (e) {
+        $("#sampleGrid").innerHTML = `<div class="result-empty">Failed to load samples.</div>`;
+      }
+    }
+
+    function renderSampleGrid() {
+      const grid = $("#sampleGrid");
+      grid.innerHTML = "";
+      manifest.forEach((s, i) => {
+        const card = document.createElement("div");
+        card.className = "sample-card";
+        card.dataset.idx = i;
+        card.innerHTML = `
+          <img src="/static/${s.robot_img}" alt="${s.id}" loading="lazy" />
+          <div class="sample-type">${s.task_dir.replace(/_v1$/, '').replace(/_/g, ' ')}</div>
+          <div class="sample-label">f${s.frame}/${s.n_frames}</div>
+        `;
+        card.addEventListener("click", () => selectSample(i));
+        grid.appendChild(card);
       });
+    }
+
+    async function selectSample(idx) {
+      const s = manifest[idx];
+      selectedSample = s;
+      $$(".sample-card").forEach(c => c.classList.remove("selected"));
+      $$(`.sample-card[data-idx="${idx}"]`).forEach(c => c.classList.add("selected"));
+
+      $("#sampleRobot").src = `/static/${s.robot_img}`;
+      $("#sampleHuman").src = `/static/${s.human_img}`;
+      $("#samplePreview").style.display = "block";
+      $("#taskInput").value = s.task;
+
+      const [robotResp, humanResp] = await Promise.all([
+        fetch(`/static/${s.robot_img}`),
+        fetch(`/static/${s.human_img}`),
+      ]);
+      const [robotBlob, humanBlob] = await Promise.all([
+        robotResp.blob(),
+        humanResp.blob(),
+      ]);
+      imageB64 = (await fileToB64(robotBlob)).b64;
+      comparisonImageB64 = (await fileToB64(humanBlob)).b64;
+    }
+
+    function fileToB64(blobOrFile) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          resolve({ b64: dataUrl.slice(dataUrl.indexOf(",") + 1), dataUrl });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blobOrFile);
+      });
+    }
+
+    loadManifest();
+
+    // ---- Example chips ----
+    $$("#examples button").forEach(btn => {
+      btn.addEventListener("click", () => { $("#taskInput").value = btn.dataset.task; });
     });
 
-    // --- rendering --------------------------------------------------------
+    // ---- Rendering ----
     function fmt(n) {
-      if (n === null || n === undefined || Number.isNaN(n)) return "—";
+      if (n === null || n === undefined || Number.isNaN(n)) return "\u2014";
       const abs = Math.abs(n);
       if (abs >= 100) return n.toFixed(2);
       if (abs >= 1) return n.toFixed(3);
       return n.toFixed(4);
     }
 
-    function renderActionTable(action, labels) {
-      let row = action;
-      if (Array.isArray(action) && Array.isArray(action[0])) row = action[0];
+    function renderActionTable(action, labels, gtAction) {
+      let row = Array.isArray(action) && Array.isArray(action[0]) ? action[0] : action;
       if (!Array.isArray(row)) return "<div class='result-empty'>Action is not an array.</div>";
 
-      const maxAbs = Math.max(...row.map((v) => Math.abs(v || 0)), 1e-6);
+      const maxAbs = Math.max(...row.map(v => Math.abs(v || 0)), 1e-6);
       const trs = row.map((v, i) => {
         const label = labels[i] ?? `dim_${i}`;
         const pct = Math.min(100, (Math.abs(v) / maxAbs) * 100);
         const sign = v >= 0 ? "pos" : "neg";
-        return `
-          <tr>
-            <td>${label}</td>
-            <td class="num">${fmt(v)}</td>
-            <td><span class="bar ${sign}" style="width:${pct}%"></span></td>
-          </tr>
-        `;
+        const gtCell = gtAction ? `<td class="num" style="color:var(--orange)">${fmt(gtAction[i])}</td>` : "";
+        return `<tr><td>${label}</td><td class="num">${fmt(v)}</td>${gtCell}<td><span class="bar ${sign}" style="width:${pct}%"></span></td></tr>`;
       }).join("");
-      return `
-        <table class="action-table">
-          <thead><tr><th>dim</th><th class="num">value</th><th style="width:55%"></th></tr></thead>
-          <tbody>${trs}</tbody>
-        </table>
-      `;
+      const gtHeader = gtAction ? `<th class="num">GT</th>` : "";
+      return `<table class="action-table"><thead><tr><th>dim</th><th class="num">pred</th>${gtHeader}<th style="width:45%"></th></tr></thead><tbody>${trs}</tbody></table>`;
     }
 
     function renderResult(result) {
       const el = $("#openvlaBody");
-      if (!result) {
-        el.innerHTML = `<div class="result-empty">No result.</div>`;
-        return;
-      }
+      if (!result) { el.innerHTML = `<div class="result-empty">No result.</div>`; return; }
       if (result.ok === false) {
-        el.innerHTML = `
-          <div class="result-meta"><span>latency <b>${fmt(result.elapsed_ms)} ms</b></span></div>
-          <div class="err-box">${result.error}</div>
-        `;
+        el.innerHTML = `<div class="result-meta"><span>latency <b>${fmt(result.elapsed_ms)} ms</b></span></div><div class="err-box">${result.error}</div>`;
         return;
       }
       const meta = [
@@ -285,24 +417,190 @@
         `shape <b>${JSON.stringify(result.shape ?? [])}</b>`,
         `unnorm <b>${result.unnorm_key_used ?? "?"}</b>`,
       ];
+      const gtAction = selectedSample?.action_gt || null;
+
+      const rawCopy = { ...result };
+      delete rawCopy.activations;
+      delete rawCopy.cka;
+
       el.innerHTML = `
-        <div class="result-meta">${meta.map((s) => `<span>${s}</span>`).join("")}</div>
-        ${renderActionTable(result.action, OPENVLA_LABELS)}
-        <details class="raw">
-          <summary>Raw JSON</summary>
-          <pre>${JSON.stringify(result, null, 2)}</pre>
-        </details>
+        <div class="result-meta">${meta.map(s => `<span>${s}</span>`).join("")}</div>
+        ${renderActionTable(result.action, OPENVLA_LABELS, gtAction)}
+        ${gtAction ? `<div class="gt-compare"><h3>Ground Truth (H&amp;R Dataset)</h3><p style="font-size:11px;color:var(--muted);margin:0;">Frame ${selectedSample.frame} of episode ${selectedSample.episode} &middot; ${selectedSample.task_dir}</p></div>` : ""}
+        <details class="raw"><summary>Raw JSON (no activations)</summary><pre>${JSON.stringify(rawCopy, null, 2)}</pre></details>
       `;
     }
 
-    // --- main submit ------------------------------------------------------
+    // ---- Activation visualization ----
+    function viridis(t) {
+      t = Math.max(0, Math.min(1, t));
+      const r = Math.round(255 * Math.min(1, Math.max(0, -0.35 + 4.2 * t - 3.85 * t * t)));
+      const g = Math.round(255 * Math.min(1, Math.max(0, -0.12 + 2.4 * t - 1.3 * t * t)));
+      const b = Math.round(255 * Math.min(1, Math.max(0, 0.56 + 1.2 * t - 2.8 * t * t)));
+      return [r, g, b];
+    }
+
+    function plasma(t) {
+      t = Math.max(0, Math.min(1, t));
+      const r = Math.round(255 * Math.min(1, Math.max(0, 0.05 + 2.8 * t - 1.85 * t * t)));
+      const g = Math.round(255 * Math.min(1, Math.max(0, -0.4 + 2.5 * t - 1.1 * t * t)));
+      const b = Math.round(255 * Math.min(1, Math.max(0, 0.75 - 1.5 * t + 1.75 * t * t)));
+      return [r, g, b];
+    }
+
+    function drawNormStrip(canvas, norms) {
+      const ctx = canvas.getContext("2d");
+      const w = norms.length;
+      const h = 1;
+      canvas.width = w;
+      canvas.height = h;
+      const img = ctx.createImageData(w, h);
+      const maxN = Math.max(...norms);
+      const minN = Math.min(...norms);
+      const range = maxN - minN || 1;
+      for (let i = 0; i < w; i++) {
+        const t = (norms[i] - minN) / range;
+        const [r, g, b] = viridis(t);
+        img.data[i * 4] = r;
+        img.data[i * 4 + 1] = g;
+        img.data[i * 4 + 2] = b;
+        img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    function drawAttnHeatmap(canvas, map) {
+      const h = map.length;
+      const w = map[0].length;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      const img = ctx.createImageData(w, h);
+      let maxV = 0;
+      for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) maxV = Math.max(maxV, map[r][c]);
+      maxV = maxV || 1;
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          const t = Math.sqrt(map[r][c] / maxV);
+          const [rv, gv, bv] = plasma(t);
+          const idx = (r * w + c) * 4;
+          img.data[idx] = rv;
+          img.data[idx + 1] = gv;
+          img.data[idx + 2] = bv;
+          img.data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    function drawCkaHeatmap(canvas, matrix) {
+      const h = matrix.length;
+      const w = matrix[0].length;
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      const img = ctx.createImageData(w, h);
+      for (let r = 0; r < h; r++) {
+        for (let c = 0; c < w; c++) {
+          const [rv, gv, bv] = viridis(matrix[r][c]);
+          const idx = (r * w + c) * 4;
+          img.data[idx] = rv;
+          img.data[idx + 1] = gv;
+          img.data[idx + 2] = bv;
+          img.data[idx + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    function renderCkaSection(cka) {
+      if (!cka) return "";
+      const bars = cka.diagonal.map((score, i) => {
+        const layer = cka.layers[i];
+        const pct = Math.max(0, Math.min(100, score * 100));
+        return `
+          <div class="cka-bar">
+            <span>L${layer}</span>
+            <span class="cka-bar-track"><span class="cka-bar-fill" style="width:${pct}%"></span></span>
+            <span>${score.toFixed(3)}</span>
+          </div>
+        `;
+      }).join("");
+      return `
+        <div class="act-section">
+          <h3>Human vs Robot CKA</h3>
+          <div class="result-meta">
+            <span>method <b>${cka.kind}</b></span>
+            <span>mean diagonal <b>${cka.mean_diagonal.toFixed(3)}</b></span>
+            <span>tokens <b>${cka.seq_len_used}</b></span>
+          </div>
+          <div class="cka-wrap">
+            <div>
+              <canvas id="ckaHeatmap"></canvas>
+              <div class="strip-label" style="margin-top:4px;">Rows: robot layers · Columns: human layers</div>
+            </div>
+            <div>
+              <div class="strip-label">Same-layer CKA</div>
+              <div class="cka-bars">${bars}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderActivations(activations, cka) {
+      const card = $("#activationsCard");
+      const body = $("#activationsBody");
+      if (!activations) { card.style.display = "none"; return; }
+      card.style.display = "block";
+
+      let html = `<div class="result-meta">
+        <span>layers <b>${activations.n_layers}</b></span>
+        <span>seq_len <b>${activations.seq_len}</b></span>
+      </div>`;
+
+      html += renderCkaSection(cka);
+      html += `<div class="act-section"><h3>Hidden State Norms (per token position)</h3><div class="norms-chart" id="normsChart"></div></div>`;
+      html += `<div class="act-section"><h3>Attention Maps (head-averaged, downsampled)</h3><div class="attn-row" id="attnRow"></div></div>`;
+
+      body.innerHTML = html;
+
+      if (cka) drawCkaHeatmap($("#ckaHeatmap"), cka.matrix);
+
+      const normsChart = $("#normsChart");
+      activations.hidden_norms.forEach(ln => {
+        const div = document.createElement("div");
+        div.className = "norm-strip";
+        div.innerHTML = `<div class="strip-label">Layer ${ln.layer}</div>`;
+        const canvas = document.createElement("canvas");
+        div.appendChild(canvas);
+        normsChart.appendChild(div);
+        drawNormStrip(canvas, ln.norms);
+      });
+
+      const attnRow = $("#attnRow");
+      activations.attention_maps.forEach(am => {
+        const div = document.createElement("div");
+        div.className = "attn-item";
+        div.innerHTML = `<div class="strip-label">Layer ${am.layer} (${am.original_seq_len} tokens)</div>`;
+        const canvas = document.createElement("canvas");
+        const size = Math.min(200, am.map.length * 4);
+        canvas.style.width = size + "px";
+        canvas.style.height = size + "px";
+        div.appendChild(canvas);
+        attnRow.appendChild(div);
+        drawAttnHeatmap(canvas, am.map);
+      });
+    }
+
+    // ---- Main submit ----
     async function predict() {
       const btn = $("#predictBtn");
       const status = $("#status");
 
       if (!imageB64) {
         status.className = "status err";
-        status.textContent = "Please choose an image first.";
+        status.textContent = "Please choose an image or select a dataset sample first.";
         return;
       }
       const task = $("#taskInput").value.trim();
@@ -312,10 +610,19 @@
         return;
       }
 
+      const returnActivations = $("#activationsCheck").checked;
+      const comparisonPayload = selectedSample ? comparisonImageB64 : null;
+
       btn.disabled = true;
       status.className = "status";
-      status.textContent = `Calling OpenVLA…  (cold-start may take 30–60 s)`;
-      $("#openvlaBody").innerHTML = `<div class="result-empty">Running…</div>`;
+      status.textContent = comparisonPayload
+        ? `Calling OpenVLA\u2026 extracting robot + human activations for CKA`
+        : `Calling OpenVLA\u2026  (cold-start may take 30\u201360 s)`;
+      $("#openvlaBody").innerHTML = `<div class="result-empty">Running\u2026</div>`;
+      if (returnActivations) {
+        $("#activationsCard").style.display = "block";
+        $("#activationsBody").innerHTML = `<div class="result-empty">Running\u2026</div>`;
+      }
 
       const t0 = performance.now();
       try {
@@ -324,20 +631,20 @@
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
             image_b64: imageB64,
+            comparison_image_b64: comparisonPayload,
             task,
             unnorm_key: $("#unnormKey").value,
+            return_activations: returnActivations,
           }),
         });
         const totalMs = performance.now() - t0;
-        if (!resp.ok) {
-          const txt = await resp.text();
-          throw new Error(`HTTP ${resp.status}: ${txt}`);
-        }
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${await resp.text()}`);
         const data = await resp.json();
         renderResult(data);
+        renderActivations(data.activations || null, data.cka || null);
 
         status.className = data.ok === false ? "status err" : "status ok";
-        status.textContent = `Done in ${fmt(totalMs)} ms — ${data.ok === false ? "error" : "ok"} (${fmt(data.elapsed_ms)} ms server-side)`;
+        status.textContent = `Done in ${fmt(totalMs)} ms \u2014 ${data.ok === false ? "error" : "ok"} (${fmt(data.elapsed_ms)} ms server-side)`;
       } catch (e) {
         status.className = "status err";
         status.textContent = `Error: ${e.message ?? e}`;
@@ -347,10 +654,7 @@
     }
 
     $("#predictBtn").addEventListener("click", predict);
-
-    fetch("/api/info").then((r) => r.json()).then((info) => {
-      $("#appName").textContent = info.app_name;
-    }).catch(() => {});
+    fetch("/api/info").then(r => r.json()).then(info => { $("#appName").textContent = info.app_name; }).catch(() => {});
   </script>
 </body>
 </html>

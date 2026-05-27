@@ -1,0 +1,173 @@
+[
+  {
+    "id": "grab_cup_v1_ep0_f0",
+    "task_dir": "grab_cup_v1",
+    "task": "pick up the cup",
+    "episode": 0,
+    "frame": 0,
+    "n_frames": 242,
+    "action_gt": [
+      192.5484619140625,
+      322.6880187988281,
+      117.07968139648438,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/grab_cup_v1_ep0_f0_robot.jpg",
+    "human_img": "samples/grab_cup_v1_ep0_f0_human.jpg"
+  },
+  {
+    "id": "grab_cup_v1_ep0_f121",
+    "task_dir": "grab_cup_v1",
+    "task": "pick up the cup",
+    "episode": 0,
+    "frame": 121,
+    "n_frames": 242,
+    "action_gt": [
+      296.7369384765625,
+      286.5395812988281,
+      81.2727279663086,
+      180.0,
+      0.0,
+      90.0,
+      0.0
+    ],
+    "robot_img": "samples/grab_cup_v1_ep0_f121_robot.jpg",
+    "human_img": "samples/grab_cup_v1_ep0_f121_human.jpg"
+  },
+  {
+    "id": "grab_cup_v1_ep0_f241",
+    "task_dir": "grab_cup_v1",
+    "task": "pick up the cup",
+    "episode": 0,
+    "frame": 241,
+    "n_frames": 242,
+    "action_gt": [
+      313.72564697265625,
+      540.622314453125,
+      71.65284729003906,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/grab_cup_v1_ep0_f241_robot.jpg",
+    "human_img": "samples/grab_cup_v1_ep0_f241_human.jpg"
+  },
+  {
+    "id": "grab_pencil_v1_ep0_f0",
+    "task_dir": "grab_pencil_v1",
+    "task": "pick up the pencil",
+    "episode": 0,
+    "frame": 0,
+    "n_frames": 394,
+    "action_gt": [
+      256.42694091796875,
+      332.9049072265625,
+      22.649295806884766,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/grab_pencil_v1_ep0_f0_robot.jpg",
+    "human_img": "samples/grab_pencil_v1_ep0_f0_human.jpg"
+  },
+  {
+    "id": "grab_pencil_v1_ep0_f197",
+    "task_dir": "grab_pencil_v1",
+    "task": "pick up the pencil",
+    "episode": 0,
+    "frame": 197,
+    "n_frames": 394,
+    "action_gt": [
+      288.8707275390625,
+      319.5249328613281,
+      10.478920936584473,
+      180.0,
+      0.0,
+      90.0,
+      0.0
+    ],
+    "robot_img": "samples/grab_pencil_v1_ep0_f197_robot.jpg",
+    "human_img": "samples/grab_pencil_v1_ep0_f197_human.jpg"
+  },
+  {
+    "id": "grab_pencil_v1_ep0_f393",
+    "task_dir": "grab_pencil_v1",
+    "task": "pick up the pencil",
+    "episode": 0,
+    "frame": 393,
+    "n_frames": 394,
+    "action_gt": [
+      132.95643615722656,
+      290.3304443359375,
+      0.0,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/grab_pencil_v1_ep0_f393_robot.jpg",
+    "human_img": "samples/grab_pencil_v1_ep0_f393_human.jpg"
+  },
+  {
+    "id": "push_box_common_v1_ep0_f0",
+    "task_dir": "push_box_common_v1",
+    "task": "push the box",
+    "episode": 0,
+    "frame": 0,
+    "n_frames": 265,
+    "action_gt": [
+      177.60879516601562,
+      302.5393981933594,
+      0.9074992537498474,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/push_box_common_v1_ep0_f0_robot.jpg",
+    "human_img": "samples/push_box_common_v1_ep0_f0_human.jpg"
+  },
+  {
+    "id": "push_box_common_v1_ep0_f132",
+    "task_dir": "push_box_common_v1",
+    "task": "push the box",
+    "episode": 0,
+    "frame": 132,
+    "n_frames": 265,
+    "action_gt": [
+      290.5608825683594,
+      333.3754577636719,
+      8.23875617980957,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/push_box_common_v1_ep0_f132_robot.jpg",
+    "human_img": "samples/push_box_common_v1_ep0_f132_human.jpg"
+  },
+  {
+    "id": "push_box_common_v1_ep0_f264",
+    "task_dir": "push_box_common_v1",
+    "task": "push the box",
+    "episode": 0,
+    "frame": 264,
+    "n_frames": 265,
+    "action_gt": [
+      319.5220642089844,
+      530.6190185546875,
+      27.81317710876465,
+      180.0,
+      0.0,
+      90.0,
+      1.0
+    ],
+    "robot_img": "samples/push_box_common_v1_ep0_f264_robot.jpg",
+    "human_img": "samples/push_box_common_v1_ep0_f264_human.jpg"
+  }
+]
