@@ -154,6 +154,90 @@ class OpenVLAWorker:
         """Return all OXE-subset stats keys baked into this OpenVLA checkpoint."""
         return list(self.available_unnorm_keys)
 
+    # -------------------------------------------------------------------------
+    # Per-layer feature extraction for probing experiments.
+    #
+    # We register forward hooks on every Llama decoder layer and capture the
+    # block output (shape: [1, seq_len, hidden_dim]). We return the activations
+    # mean-pooled over the token dimension as float16 bytes — much smaller than
+    # JSON. The probe script reshapes back to (n_layers + 1, hidden_dim).
+    #
+    # Including the embedding layer (index 0) gives n_layers+1 representations:
+    # layer 0 == post-embedding, layer N == output of decoder block N-1.
+    # -------------------------------------------------------------------------
+
+    @modal.method()
+    def extract_features(self, image_bytes: bytes, task: str) -> dict:
+        import io
+
+        import numpy as np
+        from PIL import Image
+
+        torch = self.torch
+        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        prompt = f"In: What action should the robot take to {task}?\nOut:"
+        inputs = self.processor(prompt, image).to(self.device, dtype=self.dtype)
+
+        # Find the Llama decoder layers anywhere under the model.
+        decoder_layers: list[tuple[str, "torch.nn.Module"]] = []
+        for name, module in self.vla.named_modules():
+            if module.__class__.__name__ == "LlamaDecoderLayer":
+                decoder_layers.append((name, module))
+        if not decoder_layers:
+            raise RuntimeError("No LlamaDecoderLayer modules found on OpenVLA model.")
+
+        n_decoder = len(decoder_layers)
+        # Capture only the *first* forward pass per layer. predict_action
+        # autoregresses several action tokens, each of which re-runs the
+        # entire decoder; we want the prompt-encoding pass (image+text +
+        # "Out:" -> the position right before the action is sampled).
+        captured: dict[int, "torch.Tensor"] = {}
+
+        def make_hook(idx: int):
+            def hook(_mod, _inp, out):
+                if idx in captured:
+                    return
+                h = out[0] if isinstance(out, tuple) else out
+                captured[idx] = h.detach()
+            return hook
+
+        handles = [
+            mod.register_forward_hook(make_hook(i))
+            for i, (_, mod) in enumerate(decoder_layers)
+        ]
+
+        try:
+            with torch.inference_mode():
+                _ = self.vla.predict_action(
+                    **inputs, unnorm_key="bridge_orig", do_sample=False
+                )
+        finally:
+            for h in handles:
+                h.remove()
+
+        if len(captured) != n_decoder:
+            raise RuntimeError(
+                f"Hook capture mismatch: got {len(captured)} layers, expected {n_decoder}."
+            )
+
+        # Mean-pool over the token dimension to a single H-dim vector per layer.
+        # captured[i] has shape (B=1, T, H); T is the full prompt length.
+        pooled = []
+        seq_lens = []
+        for i in range(n_decoder):
+            h = captured[i]
+            seq_lens.append(int(h.shape[1]))
+            pooled.append(h[0].mean(dim=0).to(torch.float16).cpu().numpy())
+
+        arr = np.stack(pooled, axis=0)  # (n_layers, hidden_dim) float16
+        return {
+            "features_f16": arr.tobytes(),
+            "n_layers": int(arr.shape[0]),
+            "hidden_dim": int(arr.shape[1]),
+            "seq_lens": seq_lens,
+            "task": task,
+        }
+
 
 @app.local_entrypoint()
 def smoke_test() -> None:

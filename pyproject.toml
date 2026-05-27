@@ -19,6 +19,8 @@ dependencies = [
     "h5py>=3.10",
     "huggingface_hub>=0.24",
     "numpy>=1.26",
+    # Linear-probe analysis of OpenVLA hidden states:
+    "scikit-learn>=1.4",
 ]
 
 [tool.uv]
