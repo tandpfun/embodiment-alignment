@@ -108,6 +108,61 @@
     .preview { margin-top: 10px; padding: 8px; background: var(--panel-2); border-radius: 6px; min-height: 180px; display: flex; align-items: center; justify-content: center; border: 1px dashed var(--border); }
     .preview img { max-width: 100%; max-height: 240px; border-radius: 4px; display: block; }
     .preview .empty { color: var(--muted); font-size: 12px; }
+    .source-tag { font-size: 11px; color: var(--accent); margin-top: 6px; font-family: var(--mono); min-height: 14px; }
+
+    /* H&R dataset browser */
+    .hr-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
+    @media (max-width: 700px) { .hr-grid { grid-template-columns: 1fr; } }
+    .slider-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
+    .slider-row .frame-num { font-family: var(--mono); font-size: 12px; min-width: 70px; text-align: right; color: var(--muted); }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .pair .tile { background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+    .pair .tile .head { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .pair .tile .head .dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; margin-right: 6px; }
+    .pair .tile .dot.human { background: var(--accent); }
+    .pair .tile .dot.robot { background: var(--accent-2); }
+    .pair .tile img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #000; border-radius: 4px; }
+    .pair .tile .skel { width: 100%; aspect-ratio: 16 / 9; background: var(--bg); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 11px; }
+    .pair .tile button.use {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .pair .tile button.use:hover { border-color: var(--accent); color: var(--accent); }
+    .pair .tile button.use:disabled { opacity: 0.5; cursor: not-allowed; }
+    .hr-note { font-size: 11px; color: var(--muted); margin-top: 8px; }
+
+    .hr-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .hr-actions button {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b0d12;
+      font: inherit;
+      font-weight: 600;
+      border: 0;
+      border-radius: 6px;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    .hr-actions button:disabled { opacity: 0.5; cursor: progress; }
+    .hr-status { font-size: 12px; color: var(--muted); align-self: center; }
+    .hr-status.err { color: var(--red); }
+    .hr-status.ok { color: var(--green); }
+
+    .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 800px) { .compare-grid { grid-template-columns: 1fr; } }
+    .compare-grid .col h3 { font-size: 12px; margin: 0 0 8px 0; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .compare-grid .col h3 .dot { display: inline-block; width: 7px; height: 7px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
+    .compare-grid .col h3 .dot.human { background: var(--accent); }
+    .compare-grid .col h3 .dot.robot { background: var(--accent-2); }
+    .diff-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; padding: 8px 10px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+    .diff-row b { font-family: var(--mono); color: var(--text); font-weight: 500; }
+    .diff-row span.label { color: var(--muted); }
 
     .status { margin-top: 10px; font-size: 12px; color: var(--muted); min-height: 18px; }
     .status.err { color: var(--red); }
@@ -150,8 +205,9 @@
         <label for="imageFile">Image</label>
         <input type="file" id="imageFile" accept="image/*" />
         <div class="preview" id="preview">
-          <span class="empty">No image loaded. Drop or choose any photo.</span>
+          <span class="empty">No image loaded. Drop or choose any photo, or pull from H&amp;R below.</span>
         </div>
+        <div class="source-tag" id="sourceTag"></div>
 
         <label for="taskInput">Task instruction</label>
         <input type="text" id="taskInput" value="pick up the cup on the table" />
@@ -189,6 +245,84 @@
       </section>
     </div>
 
+    <!-- H&R dataset browser (humans + robots, same tasks) -->
+    <section class="card" style="margin-top: 16px;">
+      <h2>H&amp;R Dataset <span class="badge">dannyXSC/HumanAndRobot · v0</span></h2>
+      <p class="desc">Pick a task, episode, and frame. Human and robot views are aligned 1:1, so the same frame index shows the same moment in both. Click <b>Use for OpenVLA</b> to load it as the model input.</p>
+
+      <label for="hrInstruction">Task instruction (caption sent to OpenVLA)</label>
+      <input type="text" id="hrInstruction" placeholder="e.g. push the box" />
+      <p class="desc" style="margin-top: 4px;">
+        Wrapped as: <code>In: What action should the robot take to … ?\nOut:</code>
+        — same string for human and robot when you compare. Also editable in the
+        <b>Input</b> column above (both fields stay in sync).
+      </p>
+
+      <div class="hr-grid">
+        <div>
+          <label for="hrTask">Task</label>
+          <select id="hrTask"><option>loading…</option></select>
+        </div>
+        <div>
+          <label for="hrEpisode">Episode</label>
+          <select id="hrEpisode"><option>—</option></select>
+        </div>
+        <div>
+          <label>Frame</label>
+          <div class="slider-row">
+            <input type="range" id="hrFrame" min="0" max="0" value="0" step="1" />
+            <div class="frame-num" id="hrFrameNum">— / —</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pair">
+        <div class="tile">
+          <div class="head">
+            <span><span class="dot human"></span>Human view</span>
+            <span id="hrHumanMeta"></span>
+          </div>
+          <div id="hrHumanWrap"><div class="skel">no frame loaded</div></div>
+          <button class="use" id="hrUseHuman" disabled>Use for OpenVLA →</button>
+        </div>
+        <div class="tile">
+          <div class="head">
+            <span><span class="dot robot"></span>Robot view</span>
+            <span id="hrRobotMeta"></span>
+          </div>
+          <div id="hrRobotWrap"><div class="skel">no frame loaded</div></div>
+          <button class="use" id="hrUseRobot" disabled>Use for OpenVLA →</button>
+        </div>
+      </div>
+
+      <div class="hr-actions">
+        <button id="hrCompareBtn" disabled>Compare both views with OpenVLA →</button>
+        <div class="hr-status" id="hrCompareStatus"></div>
+      </div>
+
+      <div class="hr-note" id="hrNote">First episode load triggers a one-time ~70–220 MB download (cached locally).</div>
+    </section>
+
+    <!-- Pair comparison output -->
+    <section class="card" id="compareCard" style="margin-top: 16px; display: none;">
+      <h2>OpenVLA · human vs robot <span class="badge" id="compareCtx"></span></h2>
+      <p class="desc">Both views of the same H&amp;R frame, sent to OpenVLA in parallel with the same task instruction.</p>
+      <p class="desc" id="comparePrompt" style="font-family: var(--mono); font-size: 11px; word-break: break-word;"></p>
+
+      <div class="diff-row" id="compareDiff" style="display: none;"></div>
+
+      <div class="compare-grid">
+        <div class="col">
+          <h3><span class="dot human"></span>Human view</h3>
+          <div id="compareHuman"><div class="result-empty">—</div></div>
+        </div>
+        <div class="col">
+          <h3><span class="dot robot"></span>Robot view</h3>
+          <div id="compareRobot"><div class="result-empty">—</div></div>
+        </div>
+      </div>
+    </section>
+
     <footer>
       Local playground for <code>OpenVLAWorker</code> on Modal. See <a href="/docs">/docs</a>.
     </footer>
@@ -215,20 +349,44 @@
       });
     }
 
+    function setImage(dataUrl, b64, sourceText) {
+      imageB64 = b64;
+      $("#preview").innerHTML = `<img src="${dataUrl}" alt="preview" />`;
+      $("#sourceTag").textContent = sourceText ?? "";
+    }
+
     $("#imageFile").addEventListener("change", async (e) => {
       const file = e.target.files?.[0];
       if (!file) return;
       const { b64, dataUrl } = await fileToB64(file);
-      imageB64 = b64;
-      $("#preview").innerHTML = `<img src="${dataUrl}" alt="preview" />`;
+      setImage(dataUrl, b64, `uploaded: ${file.name}`);
     });
 
     // --- example chips ----------------------------------------------------
+    function syncInstruction(fromHr) {
+      const hr = $("#hrInstruction");
+      const main = $("#taskInput");
+      if (fromHr) main.value = hr.value;
+      else hr.value = main.value;
+    }
+
+    $("#taskInput").addEventListener("input", () => syncInstruction(false));
+    $("#hrInstruction").addEventListener("input", () => syncInstruction(true));
+
     document.querySelectorAll("#examples button").forEach((btn) => {
       btn.addEventListener("click", () => {
         $("#taskInput").value = btn.dataset.task;
+        syncInstruction(false);
       });
     });
+
+    function getInstruction() {
+      return ($("#hrInstruction").value || $("#taskInput").value).trim();
+    }
+
+    function openvlaPrompt(task) {
+      return `In: What action should the robot take to ${task}?\\nOut:`;
+    }
 
     // --- rendering --------------------------------------------------------
     function fmt(n) {
@@ -305,10 +463,10 @@
         status.textContent = "Please choose an image first.";
         return;
       }
-      const task = $("#taskInput").value.trim();
+      const task = getInstruction();
       if (!task) {
         status.className = "status err";
-        status.textContent = "Please enter a task instruction.";
+        status.textContent = "Please enter a task instruction (H&R section or Input column).";
         return;
       }
 
@@ -351,6 +509,320 @@
     fetch("/api/info").then((r) => r.json()).then((info) => {
       $("#appName").textContent = info.app_name;
     }).catch(() => {});
+
+    // -------------------------------------------------------------------
+    // H&R dataset browser
+    // -------------------------------------------------------------------
+    const HR = {
+      tasks: [],          // [{name, instruction}]
+      taskByName: new Map(),
+      episodes: [],
+      numFrames: 0,
+      currentTask: null,
+      currentEpisode: null,
+      currentFrame: 0,
+      seq: 0,             // monotonic to discard stale image loads
+    };
+
+    function frameUrl(view) {
+      const params = new URLSearchParams({
+        task: HR.currentTask,
+        episode: HR.currentEpisode,
+        frame: HR.currentFrame,
+        view,
+      });
+      return `/api/hr/frame?${params.toString()}`;
+    }
+
+    async function fetchAsBlob(url) {
+      const r = await fetch(url);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.blob();
+    }
+
+    function blobToDataUrlAndB64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const comma = dataUrl.indexOf(",");
+          resolve({ dataUrl, b64: dataUrl.slice(comma + 1) });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function setSliderRange(max) {
+      const s = $("#hrFrame");
+      s.min = 0;
+      s.max = Math.max(0, max - 1);
+      s.value = 0;
+      HR.currentFrame = 0;
+      HR.numFrames = max;
+      $("#hrFrameNum").textContent = `0 / ${Math.max(0, max - 1)}`;
+    }
+
+    function setUseButtonsEnabled(enabled) {
+      $("#hrUseHuman").disabled = !enabled;
+      $("#hrUseRobot").disabled = !enabled;
+      $("#hrCompareBtn").disabled = !enabled;
+    }
+
+    function setNote(msg, isError = false) {
+      const el = $("#hrNote");
+      el.textContent = msg;
+      el.style.color = isError ? "var(--red)" : "var(--muted)";
+    }
+
+    async function loadTasks() {
+      try {
+        const r = await fetch("/api/hr/tasks");
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        HR.tasks = data.tasks;
+        HR.taskByName = new Map(data.tasks.map((t) => [t.name, t]));
+        const sel = $("#hrTask");
+        sel.innerHTML = data.tasks
+          .map((t) => `<option value="${t.name}">${t.name}</option>`)
+          .join("");
+        if (data.tasks.length) {
+          const first = data.tasks[0];
+          $("#hrInstruction").value = first.instruction;
+          syncInstruction(true);
+          await onTaskChange(first.name);
+        }
+      } catch (e) {
+        setNote(`Failed to load tasks: ${e.message ?? e}`, true);
+      }
+    }
+
+    async function onTaskChange(task) {
+      HR.currentTask = task;
+      const meta = HR.taskByName.get(task);
+      if (meta?.instruction) {
+        $("#hrInstruction").value = meta.instruction;
+        syncInstruction(true);
+      }
+      HR.currentEpisode = null;
+      setUseButtonsEnabled(false);
+      setSliderRange(0);
+      $("#hrHumanWrap").innerHTML = `<div class="skel">no frame loaded</div>`;
+      $("#hrRobotWrap").innerHTML = `<div class="skel">no frame loaded</div>`;
+      $("#hrHumanMeta").textContent = "";
+      $("#hrRobotMeta").textContent = "";
+      setNote(`Loading episodes for ${task}…`);
+      try {
+        const r = await fetch(`/api/hr/episodes?task=${encodeURIComponent(task)}`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        HR.episodes = data.episodes;
+        const ep = $("#hrEpisode");
+        ep.innerHTML = data.episodes
+          .map((e) => `<option value="${e}">episode_${e}</option>`)
+          .join("");
+        if (data.episodes.length) {
+          await onEpisodeChange(data.episodes[0]);
+        }
+      } catch (e) {
+        setNote(`Failed to load episodes: ${e.message ?? e}`, true);
+      }
+    }
+
+    async function onEpisodeChange(ep) {
+      HR.currentEpisode = ep;
+      setUseButtonsEnabled(false);
+      setSliderRange(0);
+      $("#hrHumanWrap").innerHTML = `<div class="skel">downloading episode…</div>`;
+      $("#hrRobotWrap").innerHTML = `<div class="skel">downloading episode…</div>`;
+      $("#hrHumanMeta").textContent = "";
+      $("#hrRobotMeta").textContent = "";
+      setNote(
+        `Fetching ${HR.currentTask}/episode_${ep}.hdf5 (~70–220 MB). Cached after first use.`,
+      );
+      try {
+        const r = await fetch(
+          `/api/hr/info?task=${encodeURIComponent(HR.currentTask)}&episode=${ep}`,
+        );
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${await r.text()}`);
+        const info = await r.json();
+        setSliderRange(info.num_frames);
+        setNote(
+          `${HR.currentTask} · episode_${ep}: ${info.num_frames} frames @ ${info.width}×${info.height}`,
+        );
+        await loadFrames(0);
+      } catch (e) {
+        setNote(`Episode load failed: ${e.message ?? e}`, true);
+      }
+    }
+
+    async function loadFrames(frameIdx) {
+      HR.currentFrame = frameIdx;
+      HR.seq += 1;
+      const mySeq = HR.seq;
+      $("#hrFrameNum").textContent = `${frameIdx} / ${HR.numFrames - 1}`;
+      setUseButtonsEnabled(false);
+
+      const humanUrl = frameUrl("human");
+      const robotUrl = frameUrl("robot");
+      $("#hrHumanWrap").innerHTML = `<img src="${humanUrl}" alt="human" />`;
+      $("#hrRobotWrap").innerHTML = `<img src="${robotUrl}" alt="robot" />`;
+
+      // Enable the "Use" buttons only after both images have actually loaded.
+      const imgs = [
+        $("#hrHumanWrap").querySelector("img"),
+        $("#hrRobotWrap").querySelector("img"),
+      ];
+      let pending = imgs.length;
+      imgs.forEach((img) => {
+        img.addEventListener("load", () => {
+          if (mySeq !== HR.seq) return;
+          pending -= 1;
+          if (pending === 0) setUseButtonsEnabled(true);
+        });
+        img.addEventListener("error", () => {
+          if (mySeq !== HR.seq) return;
+          setNote("Frame load failed.", true);
+        });
+      });
+    }
+
+    async function useFrame(view) {
+      try {
+        const blob = await fetchAsBlob(frameUrl(view));
+        const { dataUrl, b64 } = await blobToDataUrlAndB64(blob);
+        const taskMeta = HR.taskByName.get(HR.currentTask);
+        const tag = `H&R · ${HR.currentTask} · episode_${HR.currentEpisode} · frame ${HR.currentFrame} · ${view} view`;
+        setImage(dataUrl, b64, tag);
+        if (taskMeta?.instruction) {
+          $("#hrInstruction").value = taskMeta.instruction;
+          syncInstruction(true);
+        }
+      } catch (e) {
+        setNote(`Couldn't load ${view} frame: ${e.message ?? e}`, true);
+      }
+    }
+
+    $("#hrTask").addEventListener("change", (e) => onTaskChange(e.target.value));
+    $("#hrEpisode").addEventListener("change", (e) =>
+      onEpisodeChange(parseInt(e.target.value, 10)),
+    );
+
+    // Debounce slider so we don't fire 60 requests/sec while dragging.
+    let frameDebounce = null;
+    $("#hrFrame").addEventListener("input", (e) => {
+      const v = parseInt(e.target.value, 10);
+      $("#hrFrameNum").textContent = `${v} / ${HR.numFrames - 1}`;
+      clearTimeout(frameDebounce);
+      frameDebounce = setTimeout(() => loadFrames(v), 120);
+    });
+
+    $("#hrUseHuman").addEventListener("click", () => useFrame("human"));
+    $("#hrUseRobot").addEventListener("click", () => useFrame("robot"));
+
+    // ---- Compare both views (server-side parallel predict) -------------
+    function renderResultInto(elId, result) {
+      const el = $(elId);
+      if (!result) {
+        el.innerHTML = `<div class="result-empty">—</div>`;
+        return;
+      }
+      if (result.ok === false) {
+        el.innerHTML = `
+          <div class="result-meta"><span>latency <b>${fmt(result.elapsed_ms)} ms</b></span></div>
+          <div class="err-box">${result.error}</div>
+        `;
+        return;
+      }
+      const meta = [
+        `latency <b>${fmt(result.elapsed_ms)} ms</b>`,
+        `shape <b>${JSON.stringify(result.shape ?? [])}</b>`,
+        `unnorm <b>${result.unnorm_key_used ?? "?"}</b>`,
+      ];
+      el.innerHTML = `
+        <div class="result-meta">${meta.map((s) => `<span>${s}</span>`).join("")}</div>
+        ${renderActionTable(result.action, OPENVLA_LABELS)}
+        <details class="raw">
+          <summary>Raw JSON</summary>
+          <pre>${JSON.stringify(result, null, 2)}</pre>
+        </details>
+      `;
+    }
+
+    function renderDiff(diff) {
+      const el = $("#compareDiff");
+      if (!diff) { el.style.display = "none"; return; }
+      const parts = [
+        `<span class="label">‖human − robot‖₂</span> <b>${fmt(diff.l2)}</b>`,
+        `<span class="label">max |Δ|</span> <b>${fmt(diff.linf)}</b>`,
+        `<span class="label">dim</span> <b>${diff.dim}</b>`,
+      ];
+      el.innerHTML = parts.join(" · ");
+      el.style.display = "flex";
+    }
+
+    async function compareViews() {
+      if (HR.currentTask == null || HR.currentEpisode == null) return;
+      const btn = $("#hrCompareBtn");
+      const status = $("#hrCompareStatus");
+      const card = $("#compareCard");
+
+      btn.disabled = true;
+      status.className = "hr-status";
+      status.textContent = "Calling OpenVLA on both views in parallel… (cold-start may take 30–60 s)";
+
+      card.style.display = "";
+      $("#compareCtx").textContent =
+        `${HR.currentTask} · episode_${HR.currentEpisode} · frame ${HR.currentFrame}`;
+      $("#compareDiff").style.display = "none";
+      $("#compareHuman").innerHTML = `<div class="result-empty">Running…</div>`;
+      $("#compareRobot").innerHTML = `<div class="result-empty">Running…</div>`;
+
+      const body = {
+        task: HR.currentTask,
+        episode: HR.currentEpisode,
+        frame: HR.currentFrame,
+        instruction: getInstruction() || undefined,
+        unnorm_key: $("#unnormKey").value,
+      };
+
+      const t0 = performance.now();
+      try {
+        const resp = await fetch("/api/hr/predict_pair", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const totalMs = performance.now() - t0;
+        if (!resp.ok) {
+          const txt = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${txt}`);
+        }
+        const data = await resp.json();
+        const instr = data.instruction || getInstruction();
+        $("#comparePrompt").textContent = instr
+          ? `Prompt: ${openvlaPrompt(instr)}`
+          : "";
+        renderResultInto("#compareHuman", data.human);
+        renderResultInto("#compareRobot", data.robot);
+        renderDiff(data.diff);
+
+        const okBoth = data.human?.ok && data.robot?.ok;
+        status.className = okBoth ? "hr-status ok" : "hr-status err";
+        status.textContent =
+          `Done in ${fmt(totalMs)} ms · server-side wall ${fmt(data.wall_ms)} ms` +
+          (okBoth ? "" : " · one or both calls errored");
+      } catch (e) {
+        status.className = "hr-status err";
+        status.textContent = `Error: ${e.message ?? e}`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    $("#hrCompareBtn").addEventListener("click", compareViews);
+
+    loadTasks();
   </script>
 </body>
 </html>

@@ -15,6 +15,10 @@ dependencies = [
     "pillow>=10",
     "fastapi>=0.110",
     "uvicorn[standard]>=0.27",
+    # Browsing the H&R (dannyXSC/HumanAndRobot) dataset locally:
+    "h5py>=3.10",
+    "huggingface_hub>=0.24",
+    "numpy>=1.26",
 ]
 
 [tool.uv]
